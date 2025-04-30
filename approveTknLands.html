@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autorizar Gasto de USDT para TknLands</title>
+    <script src="https://cdn.jsdelivr.net/npm/@metamask/sdk@latest/dist/metamask-sdk.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; background-color: #f4f4f4; padding: 20px; }
+        .instructions { background-color: #e9ecef; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: left; max-width: 600px; }
+        .instructions h2 { margin-top: 0; color: #333; }
+        .instructions p { line-height: 1.6; color: #555; margin-bottom: 10px; }
+        .instructions strong { font-weight: bold; }
+        .approval-form { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 20px; text-align: center; }
+        .approval-form label { display: block; margin-bottom: 10px; font-weight: bold; }
+        .approval-form input[type="number"] { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 150px; margin-bottom: 15px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+        p#status { margin-top: 20px; font-size: 14px; color: #555; text-align: center; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h2>¿Por qué necesito autorizar USDT?</h2>
+        <p>Para poder adquirir tus TknLands utilizando USDT, primero debes permitir que nuestro contrato inteligente <strong>TknLands</strong> pueda gastar una cierta cantidad de tus USDT. Esto es un procedimiento de seguridad estándar en las transacciones de tokens en la blockchain.</p>
+        <h2>Pasos para autorizar el gasto de USDT:</h2>
+        <ol>
+            <li><strong>Asegúrate de tener instalada la extensión de MetaMask</strong> en tu navegador y de estar conectado a la red <strong>Polygon</strong>.</li>
+            <li>Ingresa la cantidad de USDT que deseas autorizar en el campo de abajo.</li>
+            <li>Haz clic en el botón <strong>"Autorizar USDT"</strong>.</li>
+            <li>Se abrirá una ventana emergente de MetaMask solicitando tu confirmación para permitir que el contrato <strong>TknLands</strong> gaste la cantidad especificada de tus USDT.</li>
+            <li>Revisa cuidadosamente los detalles de la solicitud en MetaMask. Asegúrate de que el "Spender" o "Contrato que aprueba" sea la dirección correcta de nuestro contrato <strong>TknLands</strong>: <strong><code>0x214932440b7c6aE47F0007a0118aFe6bedd233C0</code></strong>.</li>
+            <li>Confirma la transacción dentro de MetaMask. Se te cobrará una pequeña tarifa de gas en MATIC para realizar esta autorización.</li>
+            <li>Una vez que la transacción sea confirmada en la blockchain, verás un mensaje de éxito en esta página. ¡Ahora estarás listo para adquirir tus TknLands con USDT!</li>
+        </ol>
+        <p>Te recomendamos autorizar una cantidad suficiente para cubrir tus compras deseadas, más un pequeño margen para futuras transacciones si lo deseas.</p>
+        <p>Si tienes alguna duda durante este proceso, no dudes en contactar a nuestro equipo de soporte.</p>
+    </div>
+
+    <div class="approval-form">
+        <h2>Cantidad a Autorizar</h2>
+        <label for="amount">Monto en USDT:</label>
+        <input type="number" id="amount" placeholder="Ej: 100" min="0">
+        <button id="approveButton">Autorizar USDT</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const approveButton = document.getElementById('approveButton');
+        const statusDisplay = document.getElementById('status');
+        const amountInput = document.getElementById('amount');
+        const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'; // Dirección del contrato USDT en Polygon
+        const spenderAddress = '0x214932440b7c6aE47F0007a0118aFe6bedd233C0'; // Dirección de tu contrato TknLands
+        const decimals = 6; // USDT tiene 6 decimales
+        let ethereum;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const metamask = new MetaMaskSDK.MetaMaskSDK();
+            ethereum = metamask.getProvider();
+
+            if (!ethereum) {
+                statusDisplay.textContent = 'MetaMask no está instalado.';
+                approveButton.disabled = true;
+            } else {
+                try {
+                    const accounts = await ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        console.log('MetaMask conectado con la cuenta:', accounts[0]);
+                    } else {
+                        statusDisplay.textContent = 'Por favor, conecta tu billetera MetaMask.';
+                    }
+                } catch (error) {
+                    console.error('Error al conectar con MetaMask:', error);
+                    statusDisplay.textContent = 'Error al conectar con MetaMask.';
+                }
+            }
+        });
+
+        approveButton.addEventListener('click', async () => {
+            if (!ethereum) {
+                statusDisplay.textContent = 'MetaMask no está instalado.';
+                return;
+            }
+
+            const amountToApproveUSDT = amountInput.value;
+            if (!amountToApproveUSDT || isNaN(amountToApproveUSDT) || parseFloat(amountToApproveUSDT) <= 0) {
+                statusDisplay.textContent = 'Por favor, ingresa una cantidad válida de USDT.';
+                return;
+            }
+
+            const amountToApproveWei = ethers.utils.parseUnits(amountToApproveUSDT, decimals).toHexString();
+            statusDisplay.textContent = 'Solicitando aprobación...';
+
+            try {
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                if (!accounts || accounts.length === 0) {
+                    statusDisplay.textContent = 'No se pudo conectar con la billetera.';
+                    return;
+                }
+                const userAddress = accounts[0];
+
+                const approveParams = {
+                    from: userAddress,
+                    to: tokenAddress,
+                    data: ethereum.utils.keccak256('approve(address,uint256)').substring(0, 10) +
+                          ethereum.utils.padLeft(spenderAddress.toLowerCase().substring(2), 64) +
+                          ethereum.utils.padLeft(amountToApproveWei.substring(2), 64),
+                };
+
+                const txHash = await ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [approveParams],
+                });
+
+                statusDisplay.textContent = `Aprobación enviada. Hash de transacción: ${txHash}`;
+                // Opcional: Puedes redirigir al usuario a tu página de compra después de la aprobación exitosa.
+                // window.location.href = '/tu-pagina-de-compra';
+
+            } catch (error) {
+                console.error('Error al aprobar USDT:', error);
+                statusDisplay.textContent = `Error al aprobar USDT: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
