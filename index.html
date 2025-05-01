@@ -49,7 +49,7 @@
     </div>
 
     <script>
-   const approveButton = document.getElementById('approveButton');
+     const approveButton = document.getElementById('approveButton');
     const statusDisplay = document.getElementById('status');
     const amountInput = document.getElementById('amount');
     const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'; // Dirección del contrato USDT en Polygon
@@ -96,8 +96,8 @@
             approveButton.disabled = true;
         }
 
-        // Limpiar el mensaje de estado al cambiar el valor del input
-        amountInput.addEventListener('input', () => {
+        // Limpiar el mensaje de estado cuando el input recibe foco
+        amountInput.addEventListener('focus', () => {
             statusDisplay.textContent = '';
             statusDisplay.className = ''; // También limpiamos las clases de error/éxito si las hubiera
         });
