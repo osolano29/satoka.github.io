@@ -49,7 +49,7 @@
     </div>
 
     <script>
-const approveButton = document.getElementById('approveButton');
+   const approveButton = document.getElementById('approveButton');
     const statusDisplay = document.getElementById('status');
     const amountInput = document.getElementById('amount');
     const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'; // Dirección del contrato USDT en Polygon
@@ -95,6 +95,12 @@ const approveButton = document.getElementById('approveButton');
             statusDisplay.textContent = 'Error al inicializar MetaMask SDK.';
             approveButton.disabled = true;
         }
+
+        // Limpiar el mensaje de estado al cambiar el valor del input
+        amountInput.addEventListener('input', () => {
+            statusDisplay.textContent = '';
+            statusDisplay.className = ''; // También limpiamos las clases de error/éxito si las hubiera
+        });
     });
 
     approveButton.addEventListener('click', async () => {
@@ -106,16 +112,19 @@ const approveButton = document.getElementById('approveButton');
         const amountToApproveUSDT = amountInput.value;
         if (!amountToApproveUSDT || isNaN(amountToApproveUSDT) || parseFloat(amountToApproveUSDT) <= 0) {
             statusDisplay.textContent = 'Por favor, ingresa una cantidad válida de USDT.';
+            statusDisplay.className = 'error'; // Añadimos una clase para estilos de error
             return;
         }
 
         const amountToApproveWei = ethers.utils.parseUnits(amountToApproveUSDT, decimals).toHexString();
         statusDisplay.textContent = 'Solicitando aprobación...';
+        statusDisplay.className = ''; // Limpiamos las clases al iniciar la solicitud
 
         try {
             const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
             if (!accounts || accounts.length === 0) {
                 statusDisplay.textContent = 'No se pudo conectar con la billetera.';
+                statusDisplay.className = 'error';
                 return;
             }
             const userAddress = accounts[0];
@@ -134,12 +143,14 @@ const approveButton = document.getElementById('approveButton');
             });
 
             statusDisplay.textContent = `Aprobación enviada. Hash de transacción: ${txHash}`;
+            statusDisplay.className = 'success'; // Añadimos una clase para estilos de éxito
             // Opcional: Puedes redirigir al usuario a tu página de compra después de la aprobación exitosa.
             // window.location.href = '/tu-pagina-de-compra';
 
         } catch (error) {
             console.error('Error al aprobar USDT:', error);
             statusDisplay.textContent = `Error al aprobar USDT: ${error.message}`;
+            statusDisplay.className = 'error';
         }
     });
     </script>
