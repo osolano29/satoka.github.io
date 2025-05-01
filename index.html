@@ -49,81 +49,99 @@
     </div>
 
     <script>
-        const approveButton = document.getElementById('approveButton');
-        const statusDisplay = document.getElementById('status');
-        const amountInput = document.getElementById('amount');
-        const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'; // Dirección del contrato USDT en Polygon
-        const spenderAddress = '0x214932440b7c6aE47F0007a0118aFe6bedd233C0'; // Dirección de tu contrato TknLands
-        const decimals = 6; // USDT tiene 6 decimales
-        let ethereum;
+const approveButton = document.getElementById('approveButton');
+    const statusDisplay = document.getElementById('status');
+    const amountInput = document.getElementById('amount');
+    const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'; // Dirección del contrato USDT en Polygon
+    const spenderAddress = '0x214932440b7c6aE47F0007a0118aFe6bedd233C0'; // Dirección de tu contrato TknLands
+    const decimals = 6; // USDT tiene 6 decimales
+    let ethereum;
+    let metamaskSDK;
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const metamask = new MetaMaskSDK.MetaMaskSDK();
-            ethereum = metamask.getProvider();
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            metamaskSDK = new MetaMaskSDK.MetaMaskSDK();
+            ethereum = metamaskSDK.getProvider();
 
             if (!ethereum) {
                 statusDisplay.textContent = 'MetaMask no está instalado.';
                 approveButton.disabled = true;
-            } else {
-                try {
-                    const accounts = await ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0) {
-                        console.log('MetaMask conectado con la cuenta:', accounts[0]);
-                    } else {
-                        statusDisplay.textContent = 'Por favor, conecta tu billetera MetaMask.';
-                    }
-                } catch (error) {
-                    console.error('Error al conectar con MetaMask:', error);
-                    statusDisplay.textContent = 'Error al conectar con MetaMask.';
-                }
-            }
-        });
-
-        approveButton.addEventListener('click', async () => {
-            if (!ethereum) {
-                statusDisplay.textContent = 'MetaMask no está instalado.';
                 return;
             }
 
-            const amountToApproveUSDT = amountInput.value;
-            if (!amountToApproveUSDT || isNaN(amountToApproveUSDT) || parseFloat(amountToApproveUSDT) <= 0) {
-                statusDisplay.textContent = 'Por favor, ingresa una cantidad válida de USDT.';
+            // Espera un breve momento para que el proveedor se inyecte completamente (si es necesario)
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            if (!window.ethereum) {
+                statusDisplay.textContent = 'MetaMask no se detectó en el navegador.';
+                approveButton.disabled = true;
                 return;
             }
-
-            const amountToApproveWei = ethers.utils.parseUnits(amountToApproveUSDT, decimals).toHexString();
-            statusDisplay.textContent = 'Solicitando aprobación...';
+            ethereum = window.ethereum; // Usa el proveedor inyectado directamente
 
             try {
-                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-                if (!accounts || accounts.length === 0) {
-                    statusDisplay.textContent = 'No se pudo conectar con la billetera.';
-                    return;
+                const accounts = await ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    console.log('MetaMask conectado con la cuenta:', accounts[0]);
+                } else {
+                    statusDisplay.textContent = 'Por favor, conecta tu billetera MetaMask.';
                 }
-                const userAddress = accounts[0];
-
-                const approveParams = {
-                    from: userAddress,
-                    to: tokenAddress,
-                    data: ethereum.utils.keccak256('approve(address,uint256)').substring(0, 10) +
-                          ethereum.utils.padLeft(spenderAddress.toLowerCase().substring(2), 64) +
-                          ethereum.utils.padLeft(amountToApproveWei.substring(2), 64),
-                };
-
-                const txHash = await ethereum.request({
-                    method: 'eth_sendTransaction',
-                    params: [approveParams],
-                });
-
-                statusDisplay.textContent = `Aprobación enviada. Hash de transacción: ${txHash}`;
-                // Opcional: Puedes redirigir al usuario a tu página de compra después de la aprobación exitosa.
-                // window.location.href = '/tu-pagina-de-compra';
-
             } catch (error) {
-                console.error('Error al aprobar USDT:', error);
-                statusDisplay.textContent = `Error al aprobar USDT: ${error.message}`;
+                console.error('Error al conectar con MetaMask:', error);
+                statusDisplay.textContent = 'Error al conectar con MetaMask.';
             }
-        });
+        } catch (error) {
+            console.error('Error al inicializar MetaMask SDK:', error);
+            statusDisplay.textContent = 'Error al inicializar MetaMask SDK.';
+            approveButton.disabled = true;
+        }
+    });
+
+    approveButton.addEventListener('click', async () => {
+        if (!ethereum) {
+            statusDisplay.textContent = 'MetaMask no está instalado.';
+            return;
+        }
+
+        const amountToApproveUSDT = amountInput.value;
+        if (!amountToApproveUSDT || isNaN(amountToApproveUSDT) || parseFloat(amountToApproveUSDT) <= 0) {
+            statusDisplay.textContent = 'Por favor, ingresa una cantidad válida de USDT.';
+            return;
+        }
+
+        const amountToApproveWei = ethers.utils.parseUnits(amountToApproveUSDT, decimals).toHexString();
+        statusDisplay.textContent = 'Solicitando aprobación...';
+
+        try {
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            if (!accounts || accounts.length === 0) {
+                statusDisplay.textContent = 'No se pudo conectar con la billetera.';
+                return;
+            }
+            const userAddress = accounts[0];
+
+            const approveParams = {
+                from: userAddress,
+                to: tokenAddress,
+                data: '0x095ea7b3' + // approve(address,uint256) function signature
+                      ethereum.utils.padLeft(spenderAddress.toLowerCase().substring(2), 64) +
+                      ethereum.utils.padLeft(amountToApproveWei.substring(2), 64),
+            };
+
+            const txHash = await ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [approveParams],
+            });
+
+            statusDisplay.textContent = `Aprobación enviada. Hash de transacción: ${txHash}`;
+            // Opcional: Puedes redirigir al usuario a tu página de compra después de la aprobación exitosa.
+            // window.location.href = '/tu-pagina-de-compra';
+
+        } catch (error) {
+            console.error('Error al aprobar USDT:', error);
+            statusDisplay.textContent = `Error al aprobar USDT: ${error.message}`;
+        }
+    });
     </script>
 </body>
 </html>
