@@ -49,7 +49,7 @@
     </div>
 
     <script>
-     const approveButton = document.getElementById('approveButton');
+      const approveButton = document.getElementById('approveButton');
     const statusDisplay = document.getElementById('status');
     const amountInput = document.getElementById('amount');
     const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'; // Dirección del contrato USDT en Polygon
@@ -60,39 +60,44 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
         try {
-            metamaskSDK = new MetaMaskSDK.MetaMaskSDK();
-            ethereum = metamaskSDK.getProvider();
+            if (MetaMaskSDK) {
+                metamaskSDK = new MetaMaskSDK.MetaMaskSDK();
+                ethereum = metamaskSDK.getProvider();
 
-            if (!ethereum) {
-                statusDisplay.textContent = 'MetaMask no está instalado.';
-                approveButton.disabled = true;
-                return;
-            }
-
-            // Espera un breve momento para que el proveedor se inyecte completamente (si es necesario)
-            await new Promise(resolve => setTimeout(resolve, 50));
-
-            if (!window.ethereum) {
-                statusDisplay.textContent = 'MetaMask no se detectó en el navegador.';
-                approveButton.disabled = true;
-                return;
-            }
-            ethereum = window.ethereum; // Usa el proveedor inyectado directamente
-
-            try {
-                const accounts = await ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0) {
-                    console.log('MetaMask conectado con la cuenta:', accounts[0]);
-                } else {
-                    statusDisplay.textContent = 'Por favor, conecta tu billetera MetaMask.';
+                if (!ethereum) {
+                    statusDisplay.textContent = 'MetaMask no está instalado.';
+                    approveButton.disabled = true;
+                    return;
                 }
-            } catch (error) {
-                console.error('Error al conectar con MetaMask:', error);
-                statusDisplay.textContent = 'Error al conectar con MetaMask.';
+
+                // Espera un breve momento para que el proveedor se inyecte completamente (si es necesario)
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                if (!window.ethereum) {
+                    statusDisplay.textContent = 'MetaMask no se detectó en el navegador.';
+                    approveButton.disabled = true;
+                    return;
+                }
+                ethereum = window.ethereum; // Usa el proveedor inyectado directamente
+
+                try {
+                    const accounts = await ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        console.log('MetaMask conectado con la cuenta:', accounts[0]);
+                    } else {
+                        statusDisplay.textContent = 'Por favor, conecta tu billetera MetaMask.';
+                    }
+                } catch (error) {
+                    console.error('Error al conectar con MetaMask:', error);
+                    statusDisplay.textContent = 'Error al conectar con MetaMask.';
+                }
+            } else {
+                statusDisplay.textContent = 'Error: No se pudo cargar el SDK de MetaMask.';
+                approveButton.disabled = true;
             }
         } catch (error) {
             console.error('Error al inicializar MetaMask SDK:', error);
-            statusDisplay.textContent = 'Error al inicializar MetaMask SDK.';
+            statusDisplay.textContent = `Error al inicializar MetaMask SDK: ${error.message}`;
             approveButton.disabled = true;
         }
 
