@@ -114,7 +114,7 @@ async function updateUsdtBalance() {
 async function approveUSDT() {
     const amount = elements.amountInput.value.trim();
     
-    if (!amount || isNaN(amount) {
+    if (!amount || isNaN(amount)){
         showError('Ingresa una cantidad válida');
         return;
     }
