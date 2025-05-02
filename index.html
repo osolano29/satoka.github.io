@@ -3,49 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autorizar Gasto de USDT para TknLands</title>
-    <script src="https://cdn.jsdelivr.net/npm/@metamask/sdk@0.12.0/dist/metamask-sdk.global.min.js"></script>
+    <title>Aprobación de USDT para Compra de NFT</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; background-color: #f4f4f4; padding: 20px; }
-        .instructions { background-color: #e9ecef; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: left; max-width: 600px; }
-        .instructions h2 { margin-top: 0; color: #333; }
-        .instructions p { line-height: 1.6; color: #555; margin-bottom: 10px; }
-        .instructions strong { font-weight: bold; }
-        .approval-form { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 20px; text-align: center; }
-        .approval-form label { display: block; margin-bottom: 10px; font-weight: bold; }
-        .approval-form input[type="number"] { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 150px; margin-bottom: 15px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
-        button:hover { background-color: #0056b3; }
-        p#status { margin-top: 20px; font-size: 14px; color: #555; text-align: center; }
-        .success { color: green; font-weight: bold; }
-        .error { color: red; font-weight: bold; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        input, button { padding: 8px; margin: 5px 0; width: 100%; }
+        button { background-color: #f6851b; color: white; border: none; cursor: pointer; }
+        button:disabled { background-color: #cccccc; }
     </style>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdn.jsdelivr.net 'unsafe-eval'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'">
 </head>
 <body>
-    <div class="instructions">
-        <h2>¿Por qué necesito autorizar USDT?</h2>
-        <p>Para poder adquirir tus TknLands utilizando USDT, primero debes permitir que nuestro contrato inteligente <strong>TknLands</strong> pueda gastar una cierta cantidad de tus USDT. Esto es un procedimiento de seguridad estándar en las transacciones de tokens en la blockchain.</p>
-        <h2>Pasos para autorizar el gasto de USDT:</h2>
-        <ol>
-            <li><strong>Asegúrate de tener instalada la extensión de MetaMask</strong> en tu navegador y de estar conectado a la red <strong>Polygon</strong>.</li>
-            <li>Ingresa la cantidad de USDT que deseas autorizar en el campo de abajo.</li>
-            <li>Haz clic en el botón <strong>"Autorizar USDT"</strong>.</li>
-            <li>Se abrirá una ventana emergente de MetaMask solicitando tu confirmación para permitir que el contrato <strong>TknLands</strong> gaste la cantidad especificada de tus USDT.</li>
-            <li>Revisa cuidadosamente los detalles de la solicitud en MetaMask. Asegúrate de que el "Spender" o "Contrato que aprueba" sea la dirección correcta de nuestro contrato <strong>TknLands</strong>: <strong><code>0x214932440b7c6aE47F0007a0118aFe6bedd233C0</code></strong>.</li>
-            <li>Confirma la transacción dentro de MetaMask. Se te cobrará una pequeña tarifa de gas en MATIC para realizar esta autorización.</li>
-            <li>Una vez que la transacción sea confirmada en la blockchain, verás un mensaje de éxito en esta página. ¡Ahora estarás listo para adquirir tus TknLands con USDT!</li>
-        </ol>
-        <p>Te recomendamos autorizar una cantidad suficiente para cubrir tus compras deseadas, más un pequeño margen para futuras transacciones si lo deseas.</p>
-        <p>Si tienes alguna duda durante este proceso, no dudes en contactar a nuestro equipo de soporte.</p>
+    <h1>Aprobar USDT para Compra de NFT</h1>
+    
+    <div>
+        <label for="amount">Cantidad de USDT a aprobar:</label>
+        <input type="number" id="amount" placeholder="Ej: 100" step="0.01" min="0">
     </div>
-
-    <div class="approval-form">
-        <h2>Cantidad a Autorizar</h2>
-        <label for="amount">Monto en USDT:</label>
-        <input type="number" id="amount" placeholder="Ej: 100" min="0">
-        <button id="approveButton">Autorizar USDT</button>
-        <p id="status"></p>
+    
+    <button id="connectButton">Conectar MetaMask</button>
+    <button id="approveButton" disabled>Aprobar USDT</button>
+    
+    <div id="status" class="info">Por favor, conecta tu billetera MetaMask.</div>
+    <div id="walletInfo" style="display: none;">
+        <p>Dirección conectada: <span id="walletAddress"></span></p>
+        <p>Saldo USDT: <span id="usdtBalance">0</span></p>
     </div>
 
     <script src="mtsksdk.js"></script>
