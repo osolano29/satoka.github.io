@@ -111,7 +111,7 @@ async function updateUsdtBalance(address) {
 approveButton.addEventListener('click', async () => {
     const amountToApprove = amountInput.value;
     
-    if (!amountToApprove || isNaN(amountToApprove) {
+    if (!amountToApprove || isNaN(amountToApprove)) {
         statusDisplay.textContent = 'Por favor ingresa una cantidad válida de USDT.';
         statusDisplay.className = 'error';
         return;
