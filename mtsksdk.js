@@ -126,7 +126,7 @@ async function approveUSDT() {
         
         showStatus('Estimando gas...', 'info');
         const gasEstimate = await state.usdtContract.estimateGas.approve(
-            spenderAddress, 
+            spenderAddress,
             amountInWei
         );
         
