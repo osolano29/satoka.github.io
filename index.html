@@ -3,35 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aprobación de USDT para Compra de NFT</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
-        type="application/javascript"></script>
+    <title>Aprobación USDT para NFTs</title>
+    <!-- CDN verificado de ethers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .success { color: green; }
-        .error { color: red; }
-        .info { color: blue; }
-        input, button { padding: 8px; margin: 5px 0; width: 100%; }
-        button { background-color: #f6851b; color: white; border: none; cursor: pointer; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
+        .status { margin: 15px 0; padding: 10px; border-radius: 4px; }
+        .info { background-color: #e7f3fe; color: #31708f; }
+        .success { background-color: #dff0d8; color: #3c763d; }
+        .error { background-color: #f2dede; color: #a94442; }
+        button { background-color: #f6851b; color: white; padding: 10px 15px; border: none; cursor: pointer; margin: 5px 0; }
         button:disabled { background-color: #cccccc; }
+        input { padding: 8px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
-    <h1>Aprobar USDT para Compra de NFT</h1>
+    <h1>Autorización de USDT</h1>
     
     <div>
-        <label for="amount">Cantidad de USDT a aprobar:</label>
+        <label for="amount">Cantidad de USDT:</label>
         <input type="number" id="amount" placeholder="Ej: 100" step="0.01" min="0">
     </div>
     
     <button id="connectButton">Conectar MetaMask</button>
-    <button id="approveButton" disabled>Aprobar USDT</button>
+    <button id="approveButton" disabled>Autorizar USDT</button>
     
-    <div id="status" class="info">Por favor, conecta tu billetera MetaMask.</div>
     <div id="walletInfo" style="display: none;">
-        <p>Dirección conectada: <span id="walletAddress"></span></p>
+        <p>Billetera: <span id="walletAddress"></span></p>
         <p>Saldo USDT: <span id="usdtBalance">0</span></p>
     </div>
+    
+    <div id="status" class="status info">Conecta tu MetaMask para comenzar</div>
 
     <script src="mtsksdk.js"></script>
 </body>
